@@ -21,7 +21,7 @@ def main():
     incorrect2= trivia["incorrect_answers"][1]
     incorrect3= trivia["incorrect_answers"][2]
 
-    print(f"{question}")
+    print(question)
 
     print(html.unescape(f"A. {correct}"))
     print(html.unescape(f"B. {incorrect1}"))
