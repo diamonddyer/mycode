@@ -4,23 +4,30 @@
 
 def showInstructions():
     """Show the game instructions when called"""
-    #print a main menu and the commands
+    # print a main menu and the commands
     print('''
     RPG Game
     ========
-    Get to the Garden with a key and a potion to win! Avoid the monsters! Commands include go direction and get item.
+    Get to the Garden with a key and a potion to win! Avoid the monsters! Commands include go [direction] and get [item].
     ''')
 
 def showStatus():
-    """determine the current status of the player"""
-    # print the player's current location
     print('---------------------------')
     print('You are in the ' + currentRoom)
-    # print what the player is carrying
+    # ADDED ROOM DESCRIPTION 
+    print('Room Description:')
+    for direction, room in rooms[currentRoom].items():
+        if direction != 'item':
+            print(f"To the {direction.capitalize()} is the {room}")
+    
     print('Inventory:', inventory)
-    # check if there's an item in the room, if so print it
-    if "item" in rooms[currentRoom]:
-      print('You see a ' + rooms[currentRoom]['item'])
+
+    # Check if 'item' key exists and is not None
+    if 'item' in rooms[currentRoom] and rooms[currentRoom]['item'] is not None:
+        print('You see a ' + rooms[currentRoom]['item'])
+    else:
+        print('There is nothing of interest here.')
+
     print("---------------------------")
 
 
@@ -28,83 +35,71 @@ def showStatus():
 inventory = []
 
 # a dictionary linking a room to other rooms
-## A dictionary linking a room to other rooms
-## A dictionary linking a room to other rooms
 rooms = {
+    'Hall': {
+        'south': 'Kitchen',
+        'east': 'Dining Room',
+        'west': 'Bedroom',
+        'item': 'key'
+    },
 
-            'Hall' : {
-                  'south' : 'Kitchen',
-                  'east'  : 'Dining Room',
-                  'item'  : 'key'
-                },
-
-            'Kitchen' : {
-                  'north' : 'Hall',
-                  'item'  : 'monster',
-                },
-            'Dining Room' : {
-                  'west' : 'Hall',
-                  'south': 'Garden',
-                  'item' : 'potion'
-               },
-            'Garden' : {
-                  'north' : 'Dining Room'
-            }
-         }
+    'Kitchen': {
+        'north': 'Hall',
+        'item': 'monster',
+    },
+    'Dining Room': {
+        'west': 'Hall',
+        'south': 'Garden',
+        'item': 'potion'
+    },
+    'Garden': {
+        'north': 'Dining Room',
+        'item': None  # No item in the garden
+    },
+    'Bedroom': {  # ADDED NEW ROOM
+        'east': 'Hall',
+        'item': None  # No item in the bedroom
+    }
+}
 
 # start the player in the Hall
 currentRoom = 'Hall'
+moves = 0  # ADDED MOVES COUNTER
 
 showInstructions()
 
 # breaking this while loop means the game is over
 while True:
     showStatus()
+    moves += 1  # Increment moves counter
 
-    # the player MUST type something in
-    # otherwise input will keep asking
-    move = ''
-    while move == '':  
-        move = input('>')
+    move = input('>').lower().split(" ", 1)
 
-    # normalizing input:
-    # .lower() makes it lower case, .split() turns it to a list
-    # therefore, "get golden key" becomes ["get", "golden key"]          
-    move = move.lower().split(" ", 1)
-
-    #if they type 'go' first
     if move[0] == 'go':
-        #check that they are allowed wherever they want to go
         if move[1] in rooms[currentRoom]:
-            #set the current room to the new room
             currentRoom = rooms[currentRoom][move[1]]
-        # if they aren't allowed to go that way:
         else:
             print('You can\'t go that way!')
 
-    #if they type 'get' first
-    if move[0] == 'get' :
-        # make two checks:
-        # 1. if the current room contains an item
-        # 2. if the item in the room matches the item the player wishes to get
-        if "item" in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
-            #add the item to their inventory
+    if move[0] == 'get':
+        if currentRoom in rooms and 'item' in rooms[currentRoom] and move[1] in rooms[currentRoom]['item']:
             inventory.append(move[1])
-            #display a helpful message
             print(move[1] + ' got!')
-            #delete the item key:value pair from the room's dictionary
             del rooms[currentRoom]['item']
-        # if there's no item in the room or the item doesn't match
         else:
-            #tell them they can't get it
             print('Can\'t get ' + move[1] + '!')
 
-        ## If a player enters a room with a monster
-    if 'item' in rooms[currentRoom] and 'monster' in rooms[currentRoom]['item']:
-        print('A monster has got you... GAME OVER!')
-        break
-        ## Define how a player can win
+    if currentRoom in rooms and rooms[currentRoom].get('item') is not None:
+        if 'monster' in rooms[currentRoom]['item']:
+            print('A monster has got you... GAME OVER!')
+            break
+
     if currentRoom == 'Garden' and 'key' in inventory and 'potion' in inventory:
         print('You escaped the house with the ultra rare key and magic potion... YOU WIN!')
         break
+
+print("Total moves made:", moves)
+
+
+
 
